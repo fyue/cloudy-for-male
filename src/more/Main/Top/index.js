@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import css from './index.less';
 import Products from './Products';
 
-import fixredflower from './images/head/redflower.png';
+
 
 // small one
 import s1 from './images/bod/1s.png';
@@ -211,10 +211,10 @@ export default class Top extends React.Component {
     return -(left / 108) + 'rem';
   }
 
-  goToDetails(idx, ev) {
+  goToDetails(idx, mainPlayCatas, ev) {
     ev.preventDefault();
-    this.props.goDiffCataSecond(8);
-    this.props.goDetail(idx);
+    this.props.goDiffCataSecond(8); // the number 8 is actually 7;
+    this.props.goDetail(idx, mainPlayCatas);
   }
 
   /*  {
@@ -231,13 +231,9 @@ export default class Top extends React.Component {
   renderHeadWrapper() {
     let position = this.mapIdxToPosRem(this.state.activeId);
     let mainData = this.props.mainData;
-    // mainData ? console.log('renderHeadWrapper:', mainData.item_44546724274.subPrice) : '';
-    // '557489349781'
-    /* console.log('jutizhi:', mainData['item_' + '557489349781']); */
     return (
       <div className={css.head}>
         <div className={css.flexRight}>
-          {/* <img src={fixredflower} /> */}
           <div className={css.longPicWrapper} style={{left: position}} >
             {playDatas.map((item, idx) => (
               <div className={css.eachPlayItem} key={idx}>
@@ -253,7 +249,7 @@ export default class Top extends React.Component {
                   </ul>
                   <div className={css.bottom}>
                     <p><span>￥</span><span>{mainData ? mainData['item_' + item.id].subPrice : '加载中...'}</span></p>
-                    <a href="###" onClick={this.goToDetails.bind(this, idx)}><span>点击查看详情</span></a>
+                    <a href="###" onClick={this.goToDetails.bind(this, idx, 7)}><span>点击查看详情</span></a>{/*number 7 is the mainPlayCatas index*/}
                   </div>
                 </div>
               </div>

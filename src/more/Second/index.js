@@ -2,10 +2,6 @@ import React from 'react';
 import classnames from 'classnames';
 import css from './index.less';
 
-import header1 from './images/header/header1.png';
-
-import sale1 from './images/sales/pack1.png';
-
 import backMenu from './images/back.png';
 
 /* const eachCatalog = {
@@ -37,6 +33,7 @@ export default class Second extends React.Component {
   }
 
   componentDidMount() {
+
   }
 
   renderBackMenu() {

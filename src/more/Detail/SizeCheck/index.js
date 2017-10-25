@@ -33,7 +33,7 @@ class ColorCheck extends React.Component {
       width: width / 108 + 'rem',
       left: '50%',
       marginLeft: -(width / 108) / 2 + 'rem'
-    };
+    }
     return <div className={css.sizeBtn} style={style}>{size}</div>;
   }
 
