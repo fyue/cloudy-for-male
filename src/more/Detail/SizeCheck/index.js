@@ -19,7 +19,7 @@ class ColorCheck extends React.Component {
     const {product, index} = this.props;
     let {skus, skuSize} = product;
     const {sizeIndex, colorIndex} = index;
-    const sku = skus[colorIndex] || [];
+    const sku = skus[colorIndex] || []; //array(2)
     const skuSizeX = skuSize.length === 0 ? ['默认尺寸'] : skuSize;
     let size = skuSizeX.map((item, idx) => {
       const check = sizeIndex === idx;
@@ -33,12 +33,11 @@ class ColorCheck extends React.Component {
       width: width / 108 + 'rem',
       left: '50%',
       marginLeft: -(width / 108) / 2 + 'rem'
-    }
+    };
     return <div className={css.sizeBtn} style={style}>{size}</div>;
   }
 
   render() {
-
     const sizeCheck = this.renderSizeCheck();
     return (
       <div className={css.sizeCheck}>

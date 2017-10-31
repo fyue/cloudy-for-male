@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import css from './index.less';
 import Products from './Products';
 
-
+import topHeader from './images/topHeader.png';
 
 // small one
 import s1 from './images/bod/1s.png';
@@ -283,6 +283,7 @@ export default class Top extends React.Component {
     const top = classnames([css.top], [css[`bg${this.props.index}`]]);
     return (
       <div className={top}>
+        <img src={topHeader} />
           {this.renderHeadWrapper()}
           {this.renderBod()}
       </div>

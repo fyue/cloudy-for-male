@@ -51,15 +51,20 @@ class Top extends React.Component {
       effect: 'cube',
       cube: {
         shadow: false
+      },
+      onSlideChangeEnd: (swiper) => {
+        this.setState({
+          swiperIndex: swiper.activeIndex
+        });
       }
     });
   }
 
-  setBigImage(idx) {
+/*  setBigImage(idx) {
     const {product} = this.props;
     const uri = product.productImage[idx];
     this.props.setBigImage(uri);
-  }
+  }*/
 
   get getUrl() {
     const {product} = this.props;

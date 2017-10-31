@@ -44,17 +44,15 @@ class Detail extends React.Component {
 
   checkSize(index) {
     this.setState((state) => {
-      state.index.sizeIndex = state.index.sizeIndex === index ? -1 : index;
+      state.index.sizeIndex = state.index.sizeIndex === index ? -1 : index; //相等代表取消选择
     });
   }
 
   setBigImage(uri) {
     this.setState((state) => {
-      state.bigImage = uri + '_500x500q90.jpg';
+      state.bigImage = uri + '_500x500q90.jpg_.webp';
     });
   }
-
-
 
   back() {
     this.props.back();

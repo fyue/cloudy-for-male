@@ -4,6 +4,8 @@ import css from './index.less';
 
 import backMenu from './images/back.png';
 
+import topHeader from './images/topHeader.png';
+
 /* const eachCatalog = {
   type: 'laganxiang',
   header: header1,
@@ -38,7 +40,7 @@ export default class Second extends React.Component {
 
   renderBackMenu() {
     return (
-      <img src={backMenu} onTouchEnd={() => this.props.go('main')} />
+      <img className={css.backMenu} src={backMenu} onTouchEnd={() => this.props.go('main')} />
     );
   }
 
@@ -47,11 +49,11 @@ export default class Second extends React.Component {
   }
 
   renderCenter() {
-    let {header, ids, labels, items} = this.props.cataData;
-    const {products} = this.props;
+    let {header, labels, items} = this.props.cataData;
+    const {products, goStory} = this.props;
     return (
       <div className={css.centerWapper}>
-        <img src={header} />
+        <img src={header} onTouchEnd={goStory} />
         <div className={css.bod}>
           <div className={css.scrollWrapper}>
             {items.map((items, index) => (
@@ -77,6 +79,7 @@ export default class Second extends React.Component {
     return (
       <div className={second}>
         {this.renderBackMenu()}
+        <img className={css.topHeader} src={topHeader} />
         {this.renderCenter()}
       </div>
     );

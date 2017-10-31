@@ -5,6 +5,7 @@ import Detail from './Detail';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import reqwest from 'reqwest';
 import Second from './Second';
+import Story from './Story';
 /* header */
 import h1 from '../image/sec/header/1.jpg';
 import h2 from '../image/sec/header/2.jpg';
@@ -267,6 +268,8 @@ const cataDatas = [
 let products = new Array(8);
 
 const base = 'http://cloudbuy.ews.m.jaeapp.com/api/fetch/';
+const base5 = 'http://cloudbuy.ews.m.jaeapp.com/api/fetch5/'; //另一套接口
+
 const buriedPointUrl = 'http://cloudbuy.ews.m.jaeapp.com/api/datatrack/';
 
 let buriedParams = {
@@ -298,6 +301,7 @@ class Layout extends React.Component {
     this.dataLoad = this.dataLoad.bind(this);
     this.getTime = this.getTime.bind(this);
     this.buriedPoint = this.buriedPoint.bind(this);
+    this.goStory = this.goStory.bind(this);
   }
 
   componentWillMount() {
@@ -350,7 +354,7 @@ class Layout extends React.Component {
       sw.join(',') + ',' + tk.join(',') + ',' + xp.join(',') + ',' + main1.join(',') + ',' + main2.join(',');
     // console.log(itemsUrl);
     // const base = 'http://cloudbuy.ews.m.jaeapp.com/api/fetch/';
-    const url = base + itemsUrl;
+    const url = base5 + itemsUrl;
     /* reqwest({
      url: url,
      type: 'jsonp',
@@ -487,7 +491,7 @@ class Layout extends React.Component {
     });
      **/
     for (let i = 0; i < productList.length - 1; ++i) {
-      this.dataLoad(productList, i);
+      this.dataLoad5(productList, i);
     }
     // this.setState({
     //   products: products
@@ -512,13 +516,12 @@ class Layout extends React.Component {
       '557841746119'
     ];
 
-    let urlMain = base + mainTwDataIds.join(',');
+    let urlMain = base5 + mainTwDataIds.join(',');
     reqwest({
       url: urlMain,
       type: 'jsonp',
       method: 'get',
       success: (data) => {
-        console.log('data loaded:', data);
         this.setState({
           mainData: data,
         });
@@ -527,6 +530,7 @@ class Layout extends React.Component {
         console.log(data);
       }
     });
+    setTimeout(() => console.log(this.state.products), 1000);
   }
 
 
@@ -563,7 +567,17 @@ class Layout extends React.Component {
               oldObj.skusMapKeys.map((itemx) => {
                 if (itemx.propPath.indexOf(colorNumber) > -1) {
                   let skuId = itemx.skuId;
-                  let prize = oldObj.skusMapValues[skuId].price.priceMoney;
+                  //console.log(oldObj.skusMapValues[skuId]);
+                  //oldObj.skusMapValues[skuId].subPrice ? '' : console.log('itemID is:', item);
+                  let prize;
+                  if (oldObj.skusMapValues[skuId].subPrice) {
+                    prize = oldObj.skusMapValues[skuId].subPrice.priceMoney;
+                    //console.log('sub', item);
+                  } else {
+                    prize = oldObj.skusMapValues[skuId].price.priceMoney;
+                    //console.log('price', item);
+                  }
+
                   result = {skuId, prize};
                 }
               });
@@ -578,7 +592,14 @@ class Layout extends React.Component {
                 oldObj.skusMapKeys.map((itemx) => {
                   if (itemx.propPath.indexOf(colorNumber) > -1 && itemx.propPath.indexOf(sizeNumber) > -1) {
                     let skuId = itemx.skuId;
-                    let prize = oldObj.skusMapValues[skuId].price.priceMoney;
+                    let prize;
+                    if (oldObj.skusMapValues[skuId].subPrice) {
+                      prize = oldObj.skusMapValues[skuId].subPrice.priceMoney;
+                      //console.log('sub', item);
+                    } else {
+                      prize = oldObj.skusMapValues[skuId].price.priceMoney;
+                      //console.log('price', item);
+                    }
                     result = {skuId, prize};
                   }
                 });
@@ -600,6 +621,85 @@ class Layout extends React.Component {
         this.setState({
           products: products, // 解析完后的数据
         });
+      },
+      error: (data) => {
+      }
+    });
+  }
+
+  dataLoad5(productList, index) {
+    const url = base5 + productList[index].join(','); // 每一个种类的ID凭借
+    reqwest({
+      url: url,
+      type: 'jsonp',
+      method: 'get',
+      success: (data) => {
+        products[index] = productList[index].map((item) => {
+          let obj = {};
+          obj.itemId = item;
+          const oldObj = data[`item_${item}`];
+          obj.productImage = oldObj.images;
+          obj.subPrice = oldObj.subPrice;
+          obj.title = oldObj.title;
+          let skus = [];
+          let skuSize = [];
+          oldObj.skuProps.map((sku) => {
+            if (sku.propName === '尺寸' || sku.propName === '包袋大小') {
+              skuSize = sku.values;
+            } else if (sku.propName === '颜色分类') {
+              skus = sku.values;
+            }
+          });
+          obj.skuSize = skuSize.map((value) => {
+            return value.name;
+          });
+
+          if (obj.skuSize.length === 0) {
+            obj.skus = skus.map(sku => {
+              let colorNumber = sku.valueId;
+              let result = null;
+              oldObj.skusMapKeys.map((itemx) => {
+                if (itemx.propPath.indexOf(colorNumber) > -1) {
+                  let skuId = itemx.skuId;
+                  let prize = oldObj.skusMapValues[skuId].priceUnits[0].price; //?
+                  // oldObj.skusMapValues[skuId].subPrice.priceMoney
+                  // : oldObj.skusMapValues[skuId].price.priceMoney;
+                  result = {skuId, prize};
+                }
+              });
+              return result;
+            });
+          } else {
+            obj.skus = skus.map((sku) => {
+              let colorNumber = sku.valueId;
+              return skuSize.map((size) => {
+                let sizeNumber = size.valueId;
+                let result = null;
+                oldObj.skusMapKeys.map((itemx) => {
+                  if (itemx.propPath.indexOf(colorNumber) > -1 && itemx.propPath.indexOf(sizeNumber) > -1) {
+                    let skuId = itemx.skuId;
+                    // let prize = oldObj.skusMapValues[skuId].subPrice ?
+                    //   oldObj.skusMapValues[skuId].subPrice.priceMoney
+                    //   : oldObj.skusMapValues[skuId].price.priceMoney;
+
+                    let prize = oldObj.skusMapValues[skuId].priceUnits[0].price;
+                    result = {skuId, prize};
+                  }
+                });
+                return result;
+              });
+            });
+          }
+          //console.log(skus);
+          obj.skuImage = skus;
+          return obj;
+        });
+
+        this.setState({
+          products: products
+        });
+        console.log('load ready');
+        console.log('----------------------');
       },
       error: (data) => {
       }
@@ -684,28 +784,47 @@ class Layout extends React.Component {
     this.go('main');
   }
 
+  goStory() {
+    if (this.state.variety === 0) {
+      this.go('story');
+    }
+  }
+
   restart() {
     window.location.reload();
   }
 
   render() {
+    const {goAhead, mainData, products, variety, cataData, checkId} = this.state;
     let renderProxy = null;
-    switch (this.state.goAhead) {
+    switch (goAhead) {
       case 'main' : {
-        renderProxy =
-          (<Main mainData={this.state.mainData} goDiffCataSecond={this.goDiffCataSecond} goDetail={this.goDetail}
-                key="main"/>);
+        renderProxy = <Main mainData={mainData}
+                            goDiffCataSecond={this.goDiffCataSecond}
+                            goDetail={this.goDetail}
+                            key="main"/>;
         break;
       }
       case 'second' : {
-        renderProxy = (<Second products={this.state.products[this.state.variety]} go={this.go} goDetail={this.goDetail}
-                              cataData={this.state.cataData} key="second"/>);
+        renderProxy = <Second products={products[variety]}
+                              go={this.go}
+                              goDetail={this.goDetail}
+                              goStory={this.goStory}
+                              cataData={cataData}
+                              key="second"/>;
         break;
       }
       case 'detail' : {
         renderProxy =
-          (<Detail back={this.back} itemId={this.state.checkId} products={this.state.products[this.state.variety]}
-                  key="detail"/>);
+          <Detail back={this.back}
+                  itemId={checkId}
+                  products={products[variety]}
+                  key="detail"/>;
+        break;
+      }
+      case 'story' : {
+        renderProxy = <Story go={this.go}/>;
+        break;
       }
     }
 
