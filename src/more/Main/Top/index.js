@@ -201,6 +201,7 @@ export default class Top extends React.Component {
   }
 
   showTopProduct(id) {
+    this.props.defaultPoint({pageid: 'main', moduleid: 'bod', objectid: playDatas[id].id});
     this.setState({
       activeId: id,
     });
@@ -211,10 +212,10 @@ export default class Top extends React.Component {
     return -(left / 108) + 'rem';
   }
 
-  goToDetails(idx, mainPlayCatas, ev) {
+  goToDetails(idx, mainPlayCatas, bpage, bmodule, ev) {
     ev.preventDefault();
-    this.props.goDiffCataSecond(8); // the number 8 is actually 7;
-    this.props.goDetail(idx, mainPlayCatas);
+    this.props.goDiffCataSecond(8); // the number 8 will be decreased to 7;
+    this.props.goDetail(idx, mainPlayCatas, bpage, bmodule);
   }
 
   /*  {
@@ -248,8 +249,8 @@ export default class Top extends React.Component {
                     <li>{item.special2}</li>
                   </ul>
                   <div className={css.bottom}>
-                    <p><span>￥</span><span>{mainData ? mainData['item_' + item.id].subPrice : '加载中...'}</span></p>
-                    <a href="###" onClick={this.goToDetails.bind(this, idx, 7)}><span>点击查看详情</span></a>{/*number 7 is the mainPlayCatas index*/}
+                    <p><span>￥</span><span>{mainData ? (mainData['item_' + item.id] ? mainData['item_' + item.id].subPrice : '价格调整中') : '加载中...'}</span></p>                    <a href="###"
+                       onClick={this.goToDetails.bind(this, idx, 7, 'Main', 'head')}><span>点击查看详情</span></a>{/*number 7 is the mainPlayCatas index*/}
                   </div>
                 </div>
               </div>

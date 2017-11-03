@@ -28,10 +28,17 @@ class Top extends React.Component {
   }
 
   changeSwiper(index) {
+    const {product} = this.props;
     this.setState({
       swiperIndex: index
     });
     swiper.slideTo(index, 1000, false);// 切换到第一个slide，速度为1秒
+    let point = {
+      pageid: 'detail',
+      moduleid: `imageList${index}`,
+      objectid: product.itemId
+    };
+    this.props.defaultPoint(point);
   }
 
   renderSwiper() {
@@ -46,6 +53,7 @@ class Top extends React.Component {
   }
 
   componentDidMount() {
+    const {product} = this.props;
     swiper = new Swiper('.swiper-container', {
       pagination: '.swiper-pagination',
       effect: 'cube',
@@ -56,6 +64,12 @@ class Top extends React.Component {
         this.setState({
           swiperIndex: swiper.activeIndex
         });
+        let point = {
+          pageid: 'detail',
+          moduleid: `swiper-wrapper${swiper.activeIndex}`,
+          objectid: product.itemId
+        };
+        this.props.defaultPoint(point);
       }
     });
   }

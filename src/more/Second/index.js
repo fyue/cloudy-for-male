@@ -45,7 +45,7 @@ export default class Second extends React.Component {
   }
 
   checkId(index) {
-    this.props.goDetail(index);
+    this.props.goDetail(index, '', 'Second', 'products');
   }
 
   renderCenter() {

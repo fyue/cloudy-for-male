@@ -269,11 +269,12 @@ let products = new Array(8);
 
 const base = 'http://cloudbuy.ews.m.jaeapp.com/api/fetch/';
 const base5 = 'http://cloudbuy.ews.m.jaeapp.com/api/fetch5/'; //另一套接口
+/*const base5 = '//192.168.1.8/api/fetch5/'; //另一套接口*/
 
 const buriedPointUrl = 'http://cloudbuy.ews.m.jaeapp.com/api/datatrack/';
 
 let buriedParams = {
-  'accessToken': '6201512b10199e723995ZZ3ba7891270abbeda8ffac28fb287745076',
+  'userid': '287745076',
   'action': '触摸',
   'start_time': '',
   'end_time': '',
@@ -281,6 +282,37 @@ let buriedParams = {
   'store_id': '177259234',
   'item_id': ''
 };
+
+let defaultParams = {
+  shopid: '287745076',
+  storeid: '177259234',
+  deviceid: 'C66D5A7CD5', // 设备id， 已改
+  pageid: '', // 页面
+  moduleid: '', // products,
+  objectid: ''
+};
+
+const appId = 'B71ECwpHkU02u2PT1xQ6tcyb-gzGzoHsz';
+const appKey = 'f1MSkz7mlQWFvi9asqJK7xgM';
+
+// 实例化分析统计功能
+const analytics = AV.analytics({
+
+  // 设置 AppId
+  appId: appId,
+
+  // 设置 AppKey
+  appKey: appKey,
+
+  // 你当前应用或者想要指定的版本号
+  version: '1.0',
+
+  // 你当前应用的渠道或者你想指定的渠道
+  channel: 'taobao',
+
+  // 选择服务地区（默认为国内节点）
+  // region: 'cn'
+});
 
 class Layout extends React.Component {
 
@@ -302,6 +334,29 @@ class Layout extends React.Component {
     this.getTime = this.getTime.bind(this);
     this.buriedPoint = this.buriedPoint.bind(this);
     this.goStory = this.goStory.bind(this);
+    this.defaultPoint = this.defaultPoint.bind(this);
+    this.computeVarityModule = this.computeVarityModule.bind(this);
+  }
+
+  computeVarityModule(varityIdx) {
+    switch (varityIdx) {
+      case 0:
+        return '拉杆箱分类';
+      case 1:
+        return '潮流女包分类';
+      case 2:
+        return '品质男包分类';
+      case 3:
+        return '休闲双肩包分类';
+      case 4:
+        return '商务双肩包分类';
+      case 5:
+        return '商场同款分类';
+      case 6:
+        return '新品上市分类';
+      default:
+        return '';
+    }
   }
 
   componentWillMount() {
@@ -713,6 +768,10 @@ class Layout extends React.Component {
   }
 
   goDiffCataSecond(ccatalogIndex) {
+    if (ccatalogIndex < 8) {
+      let nameId = this.computeVarityModule(ccatalogIndex - 1);
+      this.defaultPoint({pageid: 'Main', moduleid: 'bottom', objectid: nameId});
+    }
     let cataData = cataDatas[ccatalogIndex - 1];
     this.setState({
       cataData: cataData,
@@ -721,7 +780,8 @@ class Layout extends React.Component {
     this.go('second');
   }
 
-  goDetail(id, mainCatalogIndex = '') {
+  goDetail(id, mainCatalogIndex = '', bpage, bmodule) {
+    //console.log('bpage: ', bpage, 'bmodule: ', bmodule);
     let {products, variety} = this.state;
     this.setState({
       checkId: id
@@ -731,18 +791,28 @@ class Layout extends React.Component {
     const time = this.getTime();
 
     if (id !== -1) {
-      if (mainCatalogIndex === '') {
+      if (mainCatalogIndex === '') { /*mainCatalogIndex is either '' or 7*/
         const itemId = products[variety][id].itemId;
         console.log('varity is:', variety);
         console.log('trackID is:', itemId);
-
         this.buriedPoint({time, itemId});
+        let bpoint = {
+          pageid: bpage,
+          moduleid: bmodule,
+          objectid: itemId
+        };
+        this.defaultPoint(bpoint); //new bury
       } else if (mainCatalogIndex === 7) {
         const itemId = products[7][id].itemId;
         console.log('varity is: 7');
         console.log('trackID is:', itemId);
-
         this.buriedPoint({time, itemId});
+        let bpoint = {
+          pageid: bpage,
+          moduleid: bmodule,
+          objectid: itemId
+        };
+        this.defaultPoint(bpoint); //new bury
       }
     }
   }
@@ -772,7 +842,30 @@ class Layout extends React.Component {
     reqwest({
       url: buriedPointUrl + data,
       type: 'jsonp',
-      method: 'get'
+      method: 'get',
+      success: (data) => {
+        console.log('buried OK:', data);
+      },
+      error: (data) => {
+        console.log('buried falied:', data);
+      },
+    });
+  }
+
+  defaultPoint({pageid, moduleid, objectid}) {
+    defaultParams.pageid = pageid;
+    defaultParams.moduleid = moduleid;
+    defaultParams.objectid = objectid;
+    const content = Object.values(defaultParams).reduce((pre, now) => {
+      return pre + '_' + now;
+    });
+    console.log(content);
+    analytics.send({
+      event: 'shopid_' + defaultParams.shopid,
+      attr: {
+        label: content
+      }
+    }, function (result) {
     });
   }
 
@@ -785,8 +878,14 @@ class Layout extends React.Component {
   }
 
   goStory() {
+    let bpoint = {
+      pageid: 'Second',
+      moduleid: 'topImageToStory',
+      objectid: 'goStory'
+    };
     if (this.state.variety === 0) {
       this.go('story');
+      this.defaultPoint(bpoint); //new bury
     }
   }
 
@@ -795,6 +894,7 @@ class Layout extends React.Component {
   }
 
   render() {
+    console.log('mataData: ', this.state.mainData && this.state.mainData);
     const {goAhead, mainData, products, variety, cataData, checkId} = this.state;
     let renderProxy = null;
     switch (goAhead) {
@@ -802,6 +902,7 @@ class Layout extends React.Component {
         renderProxy = <Main mainData={mainData}
                             goDiffCataSecond={this.goDiffCataSecond}
                             goDetail={this.goDetail}
+                            defaultPoint={this.defaultPoint}
                             key="main"/>;
         break;
       }
@@ -811,6 +912,7 @@ class Layout extends React.Component {
                               goDetail={this.goDetail}
                               goStory={this.goStory}
                               cataData={cataData}
+                              defaultPoint={this.defaultPoint}
                               key="second"/>;
         break;
       }
@@ -819,11 +921,12 @@ class Layout extends React.Component {
           <Detail back={this.back}
                   itemId={checkId}
                   products={products[variety]}
+                  defaultPoint={this.defaultPoint}
                   key="detail"/>;
         break;
       }
       case 'story' : {
-        renderProxy = <Story go={this.go}/>;
+        renderProxy = <Story go={this.go} defaultPoint={this.defaultPoint} key="story"/>;
         break;
       }
     }

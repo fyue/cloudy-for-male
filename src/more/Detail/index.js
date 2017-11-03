@@ -36,16 +36,34 @@ class Detail extends React.Component {
     } else {
       uri = product.skuImage[index];
     }
+
+
     this.setBigImage(uri);
     this.setState((state) => {
       state.index.colorIndex = state.index.colorIndex === index ? -1 : index;
     });
+
+    let point = {
+      pageid: 'detail',
+      moduleid: `colorCheck${index}`,
+      objectid: product.itemId
+    };
+    this.props.defaultPoint(point);
   }
 
   checkSize(index) {
+    const {itemId, products} = this.props;
+    const product = products[itemId];
+    const size = this.state.index.sizeIndex === index ? -1 : index;
     this.setState((state) => {
-      state.index.sizeIndex = state.index.sizeIndex === index ? -1 : index; //相等代表取消选择
+      state.index.sizeIndex = size;
     });
+    let point = {
+      pageid: 'detail',
+      moduleid: `sizeCheck${index}`,
+      objectid: product.itemId
+    };
+    this.props.defaultPoint(point);
   }
 
   setBigImage(uri) {
@@ -64,7 +82,7 @@ class Detail extends React.Component {
     const product = products[itemId];
     return (
       <div className={css.detail} style={{backgroundImage: `url(${detailImage})`}} key="detail">
-        <Top product={product} bigImage={this.state.bigImage} index={index} setBigImage={this.setBigImage}/>
+        <Top product={product} bigImage={this.state.bigImage} index={index} setBigImage={this.setBigImage} {...this.props}/>
         <div className={css.bottom}>
           <SizeCheck product={product} index={index} checkSize={this.checkSize}/>
           <ColorCheck product={product} index={index} checkColor={this.checkColor} setBigImage={this.setBigImage}/>
